@@ -22,6 +22,9 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="system_messages.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="crawler_user\__init__.py">
       <SubType>Code</SubType>
     </Compile>
