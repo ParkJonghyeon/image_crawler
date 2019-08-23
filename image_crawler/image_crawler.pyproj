@@ -2,15 +2,16 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>fb2c3c53-15fb-45d0-a221-40acc73666df</ProjectGuid>
-    <ProjectHome>.</ProjectHome>
+    <ProjectGuid>{fb2c3c53-15fb-45d0-a221-40acc73666df}</ProjectGuid>
+    <ProjectHome>
+    </ProjectHome>
     <StartupFile>image_crawler.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>image_crawler</Name>
-    <RootNamespace>image_crawler</RootNamespace>
+    <RootNamespace>imageCrawler</RootNamespace>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -21,7 +22,24 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="crawler_user\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="crawler_user\info.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="image_crawler.py" />
+    <Compile Include="__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="crawler_user\userinfo.example.ini" />
+    <Content Include="requirements.txt" />
+    <Content Include="crawler_user\userinfo.ini" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="crawler_user\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
