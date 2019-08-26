@@ -1,5 +1,6 @@
 import configparser
 
+
 class UserInfo:
 
     def __init__(self):
@@ -7,6 +8,7 @@ class UserInfo:
         config_parser.read('./crawler_user/userinfo.ini')
         self.__chrome_ver = config_parser['SYSTEM']['CHROME_VER']
         self.__chrome_driver_root = config_parser['SYSTEM']['CHROME_DIRVER_ROOT']
+        self.__default_timeout = float(config_parser['SYSTEM']['DEFAULT_TIMEOUT'])
         self.__pixiv_id = config_parser['ACCOUNT']['PIXIV_ID']
         self.__pixiv_pw = config_parser['ACCOUNT']['PIXIV_PW']
 
@@ -17,6 +19,10 @@ class UserInfo:
 
     def get_chrome_root(self):
         return self.__chrome_driver_root
+
+
+    def get_default_timeout(self):
+        return self.__default_timeout
 
 
     def get_pixiv_id(self):
