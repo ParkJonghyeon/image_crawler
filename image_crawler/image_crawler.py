@@ -1,4 +1,3 @@
-from selenium import webdriver
 from urllib3 import util, poolmanager
 import os
 import time
@@ -6,17 +5,8 @@ import time
 from crawler_user.info import UserInfo
 from crawler_util.system_messages import ProcessingMessage, ErrorMessage
 from crawler_util.system_logger import ErrorLog
-
-
-# 웹 드라이버 정상 실행 체크
-def driver_open(chrome_driver_root):
-    if chrome_driver_root == None:
-        print_log(ErrorMessage.DRIVER_ROOT_NOT_FOUND)
-    try:
-        return webdriver.Chrome(chrome_driver_root)
-    except:
-        print_log(ErrorMessage.DRIVER_CAN_NOT_OPEN)
-        return None
+from crawler_util.crawler_enum import TargetSite
+from crawler import *
 
 
 # 입력 받은 url의 https 포함 여부 체크
@@ -42,9 +32,18 @@ def url_scheme_check(target_url):
 def main():
     input_url, web_type = url_scheme_check(input())
     
-    if web_type is not None:
-        driver = driver_open(user.get_chrome_root())
-        driver.get(input_url)
+    if web_type is TargetSite.TWITTER:
+        img_crawler = twitter_crawler.TwitterCrawler(user)
+    elif web_type is TargetSite.PIXIV:
+        img_crawler = pixiv_crawler.PixivCrawler(user)
+    elif web_type is TargetSite.RULIWEB:
+        img_crawler = ruliweb_crawler.RuliwebCrawler(user)
+    elif web_type is TargetSite.DCINSIDE:
+        img_crawler = dc_crawler.DCCrawler(user)
+    else:
+        img_crawler = base_crawler.BaseCrawler(user)
+
+    img_crawler.run(input_url)
 
     
 if __name__ == '__main__':
