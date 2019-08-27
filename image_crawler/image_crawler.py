@@ -4,7 +4,8 @@ import os
 import time
 
 from crawler_user.info import UserInfo
-from system_messages import ProcessingMessage, ErrorMessage
+from crawler_util.system_messages import ProcessingMessage, ErrorMessage
+from crawler_util.system_logger import ErrorLog
 
 
 # 웹 드라이버 정상 실행 체크
@@ -44,13 +45,6 @@ def main():
     if web_type is not None:
         driver = driver_open(user.get_chrome_root())
         driver.get(input_url)
-
-
-def print_log(log_text):
-    print(log_text)
-    log_file = open(work_dir+'\log.txt','a', encoding = "utf-8")
-    log_file.write(log_text)
-    log_file.close()
 
     
 if __name__ == '__main__':

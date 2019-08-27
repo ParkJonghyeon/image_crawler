@@ -22,10 +22,34 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="crawler_enum.py">
+    <Compile Include="crawler\base_crawler.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="system_messages.py">
+    <Compile Include="crawler\dc_crawler.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="crawler\pixiv_crawler.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="crawler\ruliweb_crawler.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="crawler\twitter_crawler.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="crawler\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="crawler_util\crawler_enum.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="crawler_util\system_logger.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="crawler_util\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="crawler_util\system_messages.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="crawler_user\__init__.py">
@@ -45,7 +69,9 @@
     <Content Include="crawler_user\userinfo.ini" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="crawler\" />
     <Folder Include="crawler_user\" />
+    <Folder Include="crawler_util\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
