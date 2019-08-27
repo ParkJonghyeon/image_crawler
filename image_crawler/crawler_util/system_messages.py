@@ -1,4 +1,4 @@
-from crawler_enum import TargetSite
+from crawler_util.crawler_enum import TargetSite
 
 
 class ProcessingMessage:
