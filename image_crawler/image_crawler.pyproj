@@ -52,10 +52,10 @@
     <Compile Include="crawler_util\system_messages.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="crawler_user\__init__.py">
+    <Compile Include="crawler_info\__init__.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="crawler_user\info.py">
+    <Compile Include="crawler_info\info.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="image_crawler.py" />
@@ -64,13 +64,13 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="crawler_user\userinfo.example.ini" />
+    <Content Include="crawler_info\userinfo.example.ini" />
     <Content Include="requirements.txt" />
-    <Content Include="crawler_user\userinfo.ini" />
+    <Content Include="crawler_info\userinfo.ini" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="crawler\" />
-    <Folder Include="crawler_user\" />
+    <Folder Include="crawler_info\" />
     <Folder Include="crawler_util\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />

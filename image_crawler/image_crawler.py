@@ -2,7 +2,7 @@ from urllib3 import util, poolmanager
 import os
 import time
 
-from crawler_user.info import UserInfo
+from crawler_info.info import UserInfo
 from crawler_util.system_messages import ProcessingMessage, ErrorMessage
 from crawler_util.system_logger import ErrorLog
 from crawler_util.crawler_enum import TargetSite
