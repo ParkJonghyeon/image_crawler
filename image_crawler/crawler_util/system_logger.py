@@ -1,4 +1,4 @@
-class ErrorLog():
+class SystemLogger():
 
     def print_log(log_text):
         print(log_text)
