@@ -4,8 +4,9 @@ import time
 
 from crawler_info.info import UserInfo
 from crawler_util.system_messages import ProcessingMessage, ErrorMessage
-from crawler_util.system_logger import ErrorLog
+from crawler_util.system_logger import SystemLogger
 from crawler_util.crawler_enum import TargetSite
+from crawler_util.crawler_file_util import CrawlerFileUtil
 from crawler import *
 
 
@@ -33,15 +34,15 @@ def main():
     input_url, web_type = url_scheme_check(input())
     
     if web_type is TargetSite.TWITTER:
-        img_crawler = twitter_crawler.TwitterCrawler(user)
+        img_crawler = twitter_crawler.TwitterCrawler(user, file_util)
     elif web_type is TargetSite.PIXIV:
-        img_crawler = pixiv_crawler.PixivCrawler(user)
+        img_crawler = pixiv_crawler.PixivCrawler(user, file_util)
     elif web_type is TargetSite.RULIWEB:
-        img_crawler = ruliweb_crawler.RuliwebCrawler(user)
+        img_crawler = ruliweb_crawler.RuliwebCrawler(user, file_util)
     elif web_type is TargetSite.DCINSIDE:
-        img_crawler = dc_crawler.DCCrawler(user)
+        img_crawler = dc_crawler.DCCrawler(user, file_util)
     else:
-        img_crawler = base_crawler.BaseCrawler(user)
+        img_crawler = base_crawler.BaseCrawler(user, file_util)
 
     img_crawler.run(input_url)
 
@@ -49,5 +50,7 @@ def main():
 if __name__ == '__main__':
     work_dir = os.getcwd()
     user = UserInfo()
+    logger = SystemLogger()
+    file_util = CrawlerFileUtil(user, logger)
     default_timeout = user.get_default_timeout()
     main()

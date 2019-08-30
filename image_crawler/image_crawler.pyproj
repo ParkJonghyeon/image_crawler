@@ -43,6 +43,9 @@
     <Compile Include="crawler_util\crawler_enum.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="crawler_util\crawler_file_util.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="crawler_util\system_logger.py">
       <SubType>Code</SubType>
     </Compile>
