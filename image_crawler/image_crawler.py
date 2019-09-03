@@ -34,6 +34,7 @@ def main():
     input_url, web_type = url_scheme_check(input())
     
     if web_type is TargetSite.TWITTER:
+        input_url = input_url+'/media'
         img_crawler = twitter_crawler.TwitterCrawler(user, file_util)
     elif web_type is TargetSite.PIXIV:
         img_crawler = pixiv_crawler.PixivCrawler(user, file_util)
