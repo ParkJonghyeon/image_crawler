@@ -1,6 +1,7 @@
 import os
 from urllib3 import poolmanager
 import shutil
+import time
 
 
 # 차후에 싱글톤 클래스로 구현 시도할 것
@@ -59,3 +60,9 @@ class CrawlerFileUtil():
         shutil.copyfileobj(resp, out_file)
         out_file.close()
         resp.release_conn()
+
+
+    # 시간 표기 함수
+    # 현재 내 지역 기준으로 시간을 구하므로 localtime 사용
+    def seconds_to_time(self, seconds_val, time_format='%Y_%m_%d'):
+        return time.strftime(time_format, time.localtime(seconds_val))
