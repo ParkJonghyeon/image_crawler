@@ -18,8 +18,10 @@ class BaseCrawler():
     def driver_open(self, chrome_driver_root):
         if chrome_driver_root == None:
             print_log(ErrorMessage.DRIVER_ROOT_NOT_FOUND)
+        chrome_option = webdriver.ChromeOptions()
+        chrome_option.set_headless(headless=True)
         try:
-            return webdriver.Chrome(chrome_driver_root)
+            return webdriver.Chrome(executable_path=chrome_driver_root)
         except:
             print_log(ErrorMessage.DRIVER_CAN_NOT_OPEN)
             return None
@@ -27,12 +29,12 @@ class BaseCrawler():
 
     def run(self, input_url):
         if self.image_save_path is not None:
-            # driver = self.driver_open(self.user.get_chrome_root())
-            # driver.get(input_url)
-            img = ImageInfo(image_save_path=self.image_save_path, image_url='example.img_url')
-            self.file_util.image_download_from_image_info(img)
+            self.driver = self.driver_open(self.user.get_chrome_root())
+            self.crawler_rule(input_url)
+            # img = ImageInfo(image_save_path=self.image_save_path, image_url='example.img_url')
+            # self.file_util.image_download_from_image_info(img)
 
 
     # Override this method
-    def crawler_rule():
-        return None
+    def crawler_rule(self, input_url):
+        self.driver.get(input_url)
