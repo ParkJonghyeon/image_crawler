@@ -2,11 +2,10 @@ from crawler.base_crawler import BaseCrawler
 from crawler_info.info import ImageInfo
 
 class TwitterCrawler(BaseCrawler):
-    def __init__(self, crawler_user, crawler_file_util, use_selenium=True):
+    def __init__(self, crawler_user, crawler_file_util):
         self.user = crawler_user
         self.file_util = crawler_file_util
         self.image_save_path = self.file_util.join_dir_path(self.user.get_image_save_path(), 'twitter')
-        self.use_selenium = use_selenium
         
 
     # Override this method
@@ -27,7 +26,7 @@ class TwitterCrawler(BaseCrawler):
         # == ('h2 a').text
         profile_screenname = profile_header.find_element_by_css_selector('.username.u-dir').text
         self.artist_name = profile_name + '(' + profile_screenname + ')'
-        self.image_save_path = self.file_util.join_dir_path(self.image_save_path, self.artist_name)
+        self.image_save_path = self.file_util.join_dir_path(self.user.get_image_save_path(), self.artist_name)
 
 
     def get_twitter_contents(self):
