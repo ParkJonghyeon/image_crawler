@@ -35,15 +35,15 @@ def main():
     
     if web_type is TargetSite.TWITTER:
         input_url = input_url+'/media'
-        img_crawler = twitter_crawler.TwitterCrawler(user, file_util)
+        img_crawler = twitter_crawler.TwitterCrawler(file_util)
     elif web_type is TargetSite.PIXIV:
-        img_crawler = pixiv_crawler.PixivCrawler(user, file_util)
+        img_crawler = pixiv_crawler.PixivCrawler(file_util)
     elif web_type is TargetSite.RULIWEB:
-        img_crawler = ruliweb_crawler.RuliwebCrawler(user, file_util)
+        img_crawler = ruliweb_crawler.RuliwebCrawler(file_util)
     elif web_type is TargetSite.DCINSIDE:
-        img_crawler = dc_crawler.DCCrawler(user, file_util)
+        img_crawler = dc_crawler.DCCrawler(file_util)
     else:
-        img_crawler = base_crawler.BaseCrawler(user, file_util)
+        img_crawler = base_crawler.BaseCrawler(file_util)
 
     img_crawler.run(input_url)
 

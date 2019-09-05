@@ -8,10 +8,9 @@ from crawler_util.system_messages import ProcessingMessage, ErrorMessage
 # 드라이버 실행, 에러 처리
 # 각 크롤러에서 사이트 별로 동작해야하는 명령어 및 작업을 구현
 class BaseCrawler():
-    def __init__(self, crawler_user, crawler_file_util):
-        self.user = crawler_user
+    def __init__(self, crawler_file_util):
         self.file_util = crawler_file_util
-        self.image_save_path = self.file_util.join_dir_path(self.user.get_image_save_path(), 'base')
+        self.image_save_path = self.file_util.join_dir_path(self.file_util.user.get_image_save_path(), 'base')
                 
     
     # 웹 드라이버 정상 실행 체크
