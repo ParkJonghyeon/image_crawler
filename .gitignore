@@ -260,3 +260,4 @@ paket-files/
 __pycache__/
 *.pyc
 /image_crawler/crawler_info/userinfo.ini
+/image_crawler/webdriver/crawler_user_data/

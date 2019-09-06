@@ -51,7 +51,7 @@ def main():
 if __name__ == '__main__':
     work_dir = os.getcwd()
     user = UserInfo()
-    logger = SystemLogger()
+    logger = SystemLogger(work_dir)
     file_util = CrawlerFileUtil(user, logger)
     default_timeout = user.get_default_timeout()
     main()

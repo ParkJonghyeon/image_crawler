@@ -1,4 +1,5 @@
 from selenium import webdriver
+import subprocess
 
 from crawler_info.info import ImageInfo
 from crawler_util.system_messages import ProcessingMessage, ErrorMessage
@@ -18,9 +19,14 @@ class BaseCrawler():
         if chrome_driver_root == None:
             print_log(ErrorMessage.DRIVER_ROOT_NOT_FOUND)
         chrome_option = webdriver.ChromeOptions()
-        chrome_option.set_headless(headless=True)
+        chrome_option.add_experimental_option('debuggerAddress','127.0.0.1:'+self.file_util.user.get_chrome_port())
+        # chrome_option.set_headless(headless=False)
+        # chrome_option.add_argument(r'--user-data-dir=C:\Users\Lark\AppData\Local\Google\Chrome\User Data\Default')
+        # chrome_option.add_argument(r'user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36')
+        self.file_util.check_dir_exist(r'.\webdriver\crawler_user_data')
+        subp_chrome = subprocess.Popen([r'.\webdriver\chrome_run.bat', self.file_util.user.get_chrome_path(), self.file_util.user.get_chrome_port()], stdout=subprocess.PIPE)
         try:
-            return webdriver.Chrome(executable_path=chrome_driver_root)
+            return webdriver.Chrome(executable_path=chrome_driver_root, options=chrome_option)
         except:
             print_log(ErrorMessage.DRIVER_CAN_NOT_OPEN)
             return None
@@ -28,7 +34,7 @@ class BaseCrawler():
 
     def run(self, input_url):
         if self.image_save_path is not None:
-            self.driver = self.driver_open(self.user.get_chrome_root())
+            self.driver = self.driver_open(self.file_util.user.get_chrome_root())
             self.crawler_rule(input_url)
             # img = ImageInfo(image_save_path=self.image_save_path, image_url='example.img_url')
             # self.file_util.image_download_from_image_info(img)

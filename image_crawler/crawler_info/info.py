@@ -8,6 +8,8 @@ class UserInfo():
         config_parser.read(r'.\crawler_info\userinfo.ini')
         self.__chrome_ver = config_parser['SYSTEM']['CHROME_VER']
         self.__chrome_driver_root = config_parser['SYSTEM']['CHROME_DIRVER_ROOT']
+        self.__chrome_path = config_parser['SYSTEM']['CHROME_PATH']
+        self.__chrome_port = config_parser['SYSTEM']['CHROME_PORT']
         self.__default_timeout = float(config_parser['SYSTEM']['DEFAULT_TIMEOUT'])
         self.__image_save_path = config_parser['SYSTEM']['IMAGE_SAVE_PATH']
         self.__pixiv_id = config_parser['ACCOUNT']['PIXIV_ID']
@@ -20,6 +22,14 @@ class UserInfo():
 
     def get_chrome_root(self):
         return self.__chrome_driver_root
+
+
+    def get_chrome_path(self):
+        return self.__chrome_path
+
+
+    def get_chrome_port(self):
+        return self.__chrome_port
 
 
     def get_default_timeout(self):
