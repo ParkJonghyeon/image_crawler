@@ -50,9 +50,11 @@ class UserInfo():
 
 class ImageInfo():
 
-    def __init__(self, image_title = 'default_title', image_artist = 'unknown_artist', image_date = 'unknown_date', image_url = None, image_save_path = None):
+    def __init__(self, image_title = 'default_title', image_artist = 'unknown_artist', image_date = 'unknown_date', image_url = None, image_save_path = None, image_src = '', other_data = None):
         self.image_title = image_title
         self.image_artist = image_artist
         self.image_date = image_date
         self.image_url = image_url
         self.image_save_path = image_save_path
+        self.image_src = image_src
+        self.other_data = other_data
