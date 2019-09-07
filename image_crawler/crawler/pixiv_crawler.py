@@ -26,12 +26,12 @@ class PixivCrawler(BaseCrawler):
         if len(self.driver.find_elements_by_css_selector('.not-logged-in')) is not 0:
             self.user_login()
         self.driver.get(input_url)
-        time.sleep(5)
+        time.sleep(3)
         page_case = self.detect_page_pattern(input_url)
         if page_case is PixivPageCase.ARTIST_TOP_PAGE:
             self.crawling_artist_top_page()
         elif page_case is PixivPageCase.SINGLE_IMG_PAGE:
-            self.crawling_single_img_page(self.driver.current_url)
+            self.crawling_single_img_page()
         elif page_case is PixivPageCase.MULTI_IMG_PAGE:
             self.crawling_multi_img_page(self.driver.current_url)
         elif page_case is PixivPageCase.ANIMATED_IMG_PAGE:
@@ -43,7 +43,7 @@ class PixivCrawler(BaseCrawler):
             return False
         else:
             self.driver.get('https://accounts.pixiv.net/login')
-            self.file_util.time.sleep(5)
+            time.sleep(3)
             pyperclip.copy(self.file_util.user.get_pixiv_id())
             self.driver.find_element_by_css_selector('#LoginComponent input[type=text]').click()
             ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('v').key_up(Keys.CONTROL).perform() # Ctrl+V 전달
@@ -53,11 +53,11 @@ class PixivCrawler(BaseCrawler):
             ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('v').key_up(Keys.CONTROL).perform() # Ctrl+V 전달
             time.sleep(1)
             self.driver.find_element_by_css_selector('#LoginComponent button[type=submit]').click()
-            time.sleep(15)
+            time.sleep(5)
             return True
 
 
-    def detect_url_pattern(self, input_url):
+    def detect_page_pattern(self, input_url):
         
         if input_url.split('?')[1][0:2] is 'id':
             return PixivPageCase.ARTIST_TOP_PAGE        #주소 패턴으로 탑 페이지와 뷰 페이지를 구분
@@ -76,27 +76,76 @@ class PixivCrawler(BaseCrawler):
     # 이미지의 종류에 따라 single, multi, animated 호출
     def crawling_artist_top_page(self):
         img_info_list = []
+        # 썸네일 리스트에서 얻을 수 있는 정보로 타이틀, 아티스트, 기본 url, 날짜, 레퍼러, 이미지 id를 갖는 img_info 작성
+        # 썸네일 리스트에서 싱글, 멀티, 애니메이션 분류, 멀티의 경우 img_num을 img_info에 추가
+        # 분류에 따라 각 함수를 실행
         return img_info_list
 
 
-    def crawling_single_img_page(self, referer_url):
-        # 아티스트 정보 획득 후 저장 경로 재설정
-        referer_data = {'referer':referer_url}
-        img_info = ImageInfo(image_title='',
-                             image_artist='',
-                             image_date='',
-                             image_url='',
-                             image_save_path=self.image_save_path,
-                             image_src=TargetSite.PIXIV,
-                             other_data=referer_data)
-        return list(img_info)
+    def crawling_single_img_page(self, image_info=None):
+        # 사용자가 입력한 주소가 single 페이지의 주소인 경우
+        if image_info is None:
+            i_t = self.driver.find_element_by_css_selector('figcaption h1').text
+            artist_data = self.driver.find_element_by_css_selector('aside section h2 div div a')
+            i_a = artist_data.text + '_' + artist_data.get_attribute('href').split('id=')[1]
+            i_u = self.driver.find_element_by_css_selector('div[role=presentation] a').get_attribute('href')
+            i_d = self.img_url_to_date_and_id(i_u)
+            referer_url = self.driver.current_url
+            o_d = {'referer':referer_url, 'img_id':referer_url.split('illust_id=')[1]}
+            image_info = ImageInfo(image_title = i_t,
+                                   image_artist = i_a,
+                                   image_date = i_d,
+                                   image_url = i_u,
+                                   image_save_path = self.file_util.join_dir_path(self.image_save_path, i_a),
+                                   image_src = TargetSite.PIXIV,
+                                   other_data = o_d)
+        # top 페이지로부터 호출 된 경우 => 바로 download 작업으로 이동
+        self.file_util.image_download_from_image_info(image_info)
+        return list(image_info)
 
 
-    def crawling_multi_img_page(self, referer_url):
-        img_info_list = []
-        referer_data = {'referer':referer_url}
-        return img_info_list
+    def crawling_multi_img_page(self, image_info=None):
+        image_info_list = []
+        # 사용자가 입력한 주소가 multi 페이지의 주소인 경우
+        if image_info is None:
+            i_t = self.driver.find_element_by_css_selector('figcaption h1').text
+            artist_data = self.driver.find_element_by_css_selector('aside section h2 div div a')
+            i_a = artist_data.text + '_' + artist_data.get_attribute('href').split('id=')[1]
+            i_u = self.driver.find_element_by_css_selector('div[role=presentation] a').get_attribute('href')
+            i_d = self.img_url_to_date_and_id(i_u)
+            i_p = self.file_util.join_dir_path(self.image_save_path, i_a)
+            referer_url = self.driver.current_url
+            o_d = {'referer':referer_url, 'img_id':referer_url.split('illust_id=')[1]}
+            img_num = int(self.driver.find_element_by_css_selector('.gtm-manga-viewer-preview-modal-open div').text.split('/')[1])
+        # top 페이지로부터 호출 된 경우
+        else:
+            i_t = image_info.image_title
+            i_a = image_info.image_artist
+            i_u = image_info.image_url
+            i_d = image_info.image_date
+            i_p = image_info.image_save_path
+            o_d = image_info.other_data
+            img_num = o_d['img_num']
+
+        split_url = i_u.split('p0')
+        for i_n in range(img_num):
+            if i_n is not 0:
+                i_u = split_url[0] + 'p' + str(i_n) + split_url[1]
+            image_info = ImageInfo(image_title = i_t + '_' + str(i_n),
+                                   image_artist = i_a,
+                                   image_date = i_d,
+                                   image_url = i_u,
+                                   image_save_path = i_p,
+                                   image_src = TargetSite.PIXIV,
+                                   other_data = o_d)
+            self.file_util.image_download_from_image_info(image_i)
+            image_info_list.append(image_i)
+        return image_info_list
 
 
     def crawling_animated_img_page(self):
         return None
+
+
+    def img_url_to_date_and_id(self, img_url):
+        return '_'.join(img_url.split('/img/')[1].split('/')[0:6])
