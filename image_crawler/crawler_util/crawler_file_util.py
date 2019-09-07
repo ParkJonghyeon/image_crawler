@@ -58,12 +58,12 @@ class CrawlerFileUtil():
         print(image_info)
         print(image_info.image_url)
         # pixiv의 경우 orig 이미지에 접근하기 위해서 헤더에 referer가 필요
-        if image_info.src is TargetSite.PIXIV:
+        if image_info.image_src is TargetSite.PIXIV:
             referer_headers={'Referer':image_info.other_data['referer']}
             resp = self.pool_manager.request('GET', image_info.image_url, headers=referer_headers, preload_content=False)
         else:
             resp = self.pool_manager.request('GET', image_info.image_url, preload_content=False)
-        out_file = open(self.join_file_path(image_info.image_save_path,'test.jpg'), 'wb')
+        out_file = open(self.join_file_path(image_info.image_save_path,image_info.image_title+'.png'), 'wb')
         out_file.write(resp.data)
         out_file.close()
         resp.release_conn()
