@@ -38,6 +38,9 @@ class PixivCrawler(BaseCrawler):
             time.sleep(1)
             print("탑 페이지")
             tmp=self.crawling_artist_top_page()
+        elif page_case is PixivPageCase.ARTIST_TOP_PAGE_VIEW_ALL:
+            print("탑 페이지")
+            tmp=self.crawling_artist_top_page()
         elif page_case is PixivPageCase.SINGLE_IMG_PAGE:
             print("싱글 페이지")
             tmp=self.crawling_single_img_page()
@@ -68,19 +71,19 @@ class PixivCrawler(BaseCrawler):
             return True
 
 
-    # 속도가 너무 느림. 입력받은 url을 파싱해서 직접 판단하도록 처리해볼것
     def detect_page_pattern(self, input_url):
-        if input_url.split('?')[1][0:2] == 'id':
-            return PixivPageCase.ARTIST_TOP_PAGE        #주소 패턴으로 탑 페이지와 뷰 페이지를 구분
+        if r'member.php?' in input_url:
+            return PixivPageCase.ARTIST_TOP_PAGE
+        elif r'member_illust.php?id=' in input_url:
+            return PixivPageCase.ARTIST_TOP_PAGE_VIEW_ALL
         else:
-            view_area = self.driver.find_element_by_css_selector('div[role=presentation]')
-            picture_area = view_area.find_elements_by_css_selector('div[role=presentation]>div')
+            picture_area = self.driver.find_elements_by_css_selector('figure>div[role=presentation]>div>div')
             if len(picture_area) == 0:
-                return PixivPageCase.ANIMATED_IMG_PAGE  #div[role=presentation] 하위에 canvas
+                return PixivPageCase.ANIMATED_IMG_PAGE  #div[role=presentation]>div>div가 없음
             elif len(picture_area) == 1:
-                return PixivPageCase.SINGLE_IMG_PAGE    #div[role=presentation] 하위에 이미지를 위한 단일 div
+                return PixivPageCase.SINGLE_IMG_PAGE    #div[role=presentation]>div>div 구조를 갖는 것은 1개 뿐
             else:
-                return PixivPageCase.MULTI_IMG_PAGE     #div[role=presentation] 하위에 이미지와 미리보기를 위한 2개의 div
+                return PixivPageCase.MULTI_IMG_PAGE     #div[role=presentation]>div>div 구조를 갖는 것은 3개
 
 
     # 픽시브 이미지는 이미지의 i.pximg 주소를 파싱하여 원본 주소, 작성 날짜 파악 가능
@@ -144,8 +147,8 @@ class PixivCrawler(BaseCrawler):
         for i_n in range(img_num):
             if i_n is not 0:
                 i_u = split_url[0] + 'p' + str(i_n) + split_url[1]
+                image_info.image_url = i_u
             image_info.image_title = image_info.image_title + '_' + str(i_n)
-            image_info.image_url = i_u
             self.file_util.image_download_from_image_info(image_info)
             image_info_list.append(image_info)
         return image_info_list
@@ -158,6 +161,9 @@ class PixivCrawler(BaseCrawler):
     # 정보 생성 메소드들은 최소한의 탐색으로 끝나게 구조 수정. 현재 방식은 느림
     # 타이틀에 \/:*?"<>| 해당 문자 들어갈경우 파일 쓰기에서 문제 발생 -> 타이틀 필터링 필요
     # 아티스트 탑 페이지의 썸네일로부터 image_info를 생성 할 경우 사용하는 함수
+    # 수정 사항 : css_selector의 사용 최소화
+    # selenium으로는 각 이미지의 개별 페이지 주소만을 획득하고 이후 urllib의 request와 bs4를 통한 파싱으로 수행
+    # 속도 문제의 해결 및 오리지널 이미지의 확장자 불확신 문제를 해결 가능
     def make_image_info_from_image_thumbnail(self, thumbnail_source):
         print("썸네일로부터 정보 생성 중")
         i_t = thumbnail_source.find_elements_by_css_selector('a')[1].text #a:last-child에서 에러, 이 방식도 종종 에러 확실한 경로 찾아볼 것
