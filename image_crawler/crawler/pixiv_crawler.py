@@ -2,6 +2,7 @@ import pyperclip
 import time
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
+from threading import Thread
 
 from crawler.base_crawler import BaseCrawler
 from crawler_info.info import ImageInfo
@@ -33,7 +34,6 @@ class PixivCrawler(BaseCrawler):
         print("케이스 판단")
         page_case = self.detect_page_pattern(input_url)
         if page_case is PixivPageCase.ARTIST_TOP_PAGE:
-            # 모두보기 클릭한 뒤의 주소를 던저줄 경우의 예외처리가 없음
             self.driver.find_element_by_css_selector('div div a[href*="/member_illust.php?id="] div').click()
             time.sleep(1)
             print("탑 페이지")
@@ -90,13 +90,11 @@ class PixivCrawler(BaseCrawler):
     # 이미지의 종류에 따라 single, multi, animated 호출
     def crawling_artist_top_page(self):
         img_info_list = []
-        # 썸네일 리스트에서 얻을 수 있는 정보로 타이틀, 아티스트, 기본 url, 날짜, 레퍼러, 이미지 id를 갖는 img_info
-        # 작성
-        # 썸네일 리스트에서 싱글, 멀티, 애니메이션 분류, 멀티의 경우 img_num을 img_info에 추가
-        # 분류에 따라 각 함수를 실행
+        # 썸네일에서 얻을 수 있는 정보로 타이틀, 아티스트, 기본 url, 날짜, 레퍼러, 이미지 id를 갖는 img_info 작성
+        # 스레드: image info from thumbnail => 다운로더에 합치는 등으로 스레드에서 생성하도록 수정, 다운로더
         print("공통 정보 획득")
         artist_data = self.driver.find_element_by_css_selector('h1')
-        i_a = artist_data.text + '_' + self.driver.current_url.split('id=')[1]
+        i_a = self.artist_name_filter(artist_data.text) + '_' + self.driver.current_url.split('id=')[1]
         i_p = self.file_util.join_dir_path(self.image_save_path, i_a)
         print("페이지 탐색 시작")
         while True:
@@ -107,11 +105,12 @@ class PixivCrawler(BaseCrawler):
                 image_info.image_artist, image_info.image_save_path = i_a, i_p
                 print("적당한 다운로더 실행")
                 if image_info.other_data['img_total_num'] == 1:
-                    tmp = self.crawling_single_img_page(image_info)
+                    tmp = Thread(target=self.crawling_single_img_page, args=(image_info,))
                 elif image_info.other_data['img_total_num'] == 0:
-                    tmp = self.crawling_animated_img_page(image_info)
+                    tmp = Thread(target=self.crawling_animated_img_page, args=(image_info,))
                 else:
-                    tmp = self.crawling_multi_img_page(image_info)
+                    tmp = Thread(target=self.crawling_multi_img_page, args=(image_info,))
+                tmp.start()
             print("다음페이지 여부 확인")
             next_page_btn = self.driver.find_element_by_css_selector('a polyline[transform*="rotate(-90"]')
             if next_page_btn.is_displayed():
@@ -155,11 +154,11 @@ class PixivCrawler(BaseCrawler):
 
 
     def crawling_animated_img_page(self, image_info=None):
+        print("애니메이션 다운로더")
         return None
 
 
     # 정보 생성 메소드들은 최소한의 탐색으로 끝나게 구조 수정. 현재 방식은 느림
-    # 타이틀에 \/:*?"<>| 해당 문자 들어갈경우 파일 쓰기에서 문제 발생 -> 타이틀 필터링 필요
     # 아티스트 탑 페이지의 썸네일로부터 image_info를 생성 할 경우 사용하는 함수
     # 수정 사항 : css_selector의 사용 최소화
     # selenium으로는 각 이미지의 개별 페이지 주소만을 획득하고 이후 urllib의 request와 bs4를 통한 파싱으로 수행
@@ -198,7 +197,7 @@ class PixivCrawler(BaseCrawler):
         print("이미지 페이지로부터 정보 생성 중")
         i_t = self.driver.find_element_by_css_selector('figcaption h1').text
         artist_data = self.driver.find_element_by_css_selector('aside section h2 div div a')
-        i_a = artist_data.text + '_' + artist_data.get_attribute('href').split('id=')[1]
+        i_a = self.artist_name_filter(artist_data.text) + '_' + artist_data.get_attribute('href').split('id=')[1]
         i_u = self.driver.find_element_by_css_selector('div[role=presentation] a').get_attribute('href')
         i_d = self.img_url_to_date_and_id(i_u)
         i_p = self.file_util.join_dir_path(self.image_save_path, i_a)
@@ -215,3 +214,11 @@ class PixivCrawler(BaseCrawler):
 
     def img_url_to_date_and_id(self, img_url):
         return '_'.join(img_url.split('/img/')[1].split('/')[0:6])
+
+
+    # 닉네임에 상태 표시를 위해 @을 한개만 사용한 경우
+    def artist_name_filter(self, artist_name_text):
+        if artist_name_text.count('@',1) == 1: 
+            return artist_name_text.split('@')[0]
+        else:
+            return artist_name_text

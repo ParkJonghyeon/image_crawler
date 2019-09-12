@@ -12,6 +12,7 @@ class CrawlerFileUtil():
         self.pool_manager = poolmanager.PoolManager()
         self.user = crawler_user
         self.logger = system_logger
+        self.stop_word = ['\\','/',':','*','?','"','<','>','|' ]
 
 
     # diretory 함수
@@ -66,7 +67,8 @@ class CrawlerFileUtil():
                 resp = self.pool_manager.request('GET', image_info.image_url[:-4]+'.jpg', headers=referer_headers, preload_content=False)
         else:
             resp = self.pool_manager.request('GET', image_info.image_url, preload_content=False)
-        out_file = open(self.join_file_path(image_info.image_save_path, image_info.image_date + image_info.image_title + '.png'), 'wb')
+        save_file_name = self.file_name_filter(image_info.image_date + '_' + image_info.image_title + '.png')
+        out_file = open(self.join_file_path(image_info.image_save_path, save_file_name), 'wb')
         out_file.write(resp.data)
         out_file.close()
         resp.release_conn()
@@ -76,3 +78,11 @@ class CrawlerFileUtil():
     # 현재 내 지역 기준으로 시간을 구하므로 localtime 사용
     def seconds_to_time(self, seconds_val, time_format='%Y_%m_%d'):
         return time.strftime(time_format, time.localtime(seconds_val))
+
+
+    # 파일 이름에 사용 금지 된 문자 필터링
+    def file_name_filter(self, file_name):
+        for sw in self.stop_word:
+            if sw in file_name:
+                file_name = file_name.replace(sw,'_')
+        return file_name
