@@ -161,8 +161,9 @@ class PixivCrawler(BaseCrawler):
     # 정보 생성 메소드들은 최소한의 탐색으로 끝나게 구조 수정. 현재 방식은 느림
     # 아티스트 탑 페이지의 썸네일로부터 image_info를 생성 할 경우 사용하는 함수
     # 수정 사항 : css_selector의 사용 최소화
-    # selenium으로는 각 이미지의 개별 페이지 주소만을 획득하고 이후 urllib의 request와 bs4를 통한 파싱으로 수행
-    # 속도 문제의 해결 및 오리지널 이미지의 확장자 불확신 문제를 해결 가능
+    # basecrawler의 implicitly_wait(30)로 인한 속도 저하가 가장 큰 원인
+    # 한자리수 이내의 wait 또는 개별 명령 실행 중의 wait로 시간 간격 조절 필요
+    # css_selector의 최적화 및 간소화는 필요. requests를 사용할 경우 동적 스크립트의 파싱이 난해해지므로 현재 방식을 유지
     def make_image_info_from_image_thumbnail(self, thumbnail_source):
         print("썸네일로부터 정보 생성 중")
         i_t = thumbnail_source.find_elements_by_css_selector('a')[1].text #a:last-child에서 에러, 이 방식도 종종 에러 확실한 경로 찾아볼 것
