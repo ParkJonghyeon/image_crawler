@@ -35,7 +35,6 @@ class BaseCrawler():
     def run(self, input_url):
         if self.image_save_path is not None:
             self.driver = self.driver_open(self.file_util.user.get_chrome_root())
-            # self.driver.implicitly_wait(30)
             self.crawler_rule(input_url)
             # img = ImageInfo(image_save_path=self.image_save_path, image_url='example.img_url')
             # self.file_util.image_download_from_image_info(img)

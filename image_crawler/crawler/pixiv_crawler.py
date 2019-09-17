@@ -1,7 +1,9 @@
-import pyperclip
-import time
+import pyperclip, time, random
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from threading import Thread
 
 from crawler.base_crawler import BaseCrawler
@@ -25,8 +27,11 @@ class PixivCrawler(BaseCrawler):
         # 실행마다 로그인 상태를 체크하여 유저정보 ini에 픽시브 계정 데이터가 있는 경우만 로그인 시도
         print("베이스 이동")
         self.driver.get(self.base_url)
-        print("로그인 처리")
-        if len(self.driver.find_elements_by_css_selector('.not-logged-in')) is not 0:
+        try:
+            WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, '#page-mypage')))
+            print("로그인 확인")
+        except:
+            print("로그인 시도")
             self.user_login()
         print("입력 url 이동")
         self.driver.get(input_url)
@@ -98,7 +103,9 @@ class PixivCrawler(BaseCrawler):
         i_p = self.file_util.join_dir_path(self.image_save_path, i_a)
         print("페이지 탐색 시작")
         while True:
-            img_thumb_list = self.driver.find_elements_by_css_selector('div>ul>li>div')
+            # JavaScript가 실행 되어 썸네일 이미지를 모두 로드 시키도록 브라우저를 스크롤 다운 후 find
+            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            img_thumb_list = WebDriverWait(self.driver, 5).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'div>ul>li>div')))
             print("썸네일 정보 입수 시작")
             for img_thumb in img_thumb_list:
                 image_info = self.make_image_info_from_image_thumbnail(img_thumb)
@@ -111,10 +118,13 @@ class PixivCrawler(BaseCrawler):
                 else:
                     tmp = Thread(target=self.crawling_multi_img_page, args=(image_info,))
                 tmp.start()
+                print("봇 탐지 회피를 위해 1~5초 사이로 랜덤하게 대기")
+                time.sleep(random.uniform(1,5))
             print("다음페이지 여부 확인")
             next_page_btn = self.driver.find_element_by_css_selector('a polyline[transform*="rotate(-90"]')
             if next_page_btn.is_displayed():
-                next_page_btn.click()
+                # polyline에는 click 속성이 없으므로 그 부모인 svg를 찾아 클릭
+                next_page_btn.find_element_by_xpath('..').click()
             else:
                 break
         return img_info_list
@@ -142,12 +152,13 @@ class PixivCrawler(BaseCrawler):
             img_num = image_info.other_data['img_total_num']
 
         split_url = image_info.image_url.split('p0')
+        orig_title = image_info.image_title
         print("다수의 이미지 반복 다운로드 시작")
         for i_n in range(img_num):
             if i_n is not 0:
                 i_u = split_url[0] + 'p' + str(i_n) + split_url[1]
                 image_info.image_url = i_u
-            image_info.image_title = image_info.image_title + '_' + str(i_n)
+            image_info.image_title = orig_title + '_' + str(i_n)
             self.file_util.image_download_from_image_info(image_info)
             image_info_list.append(image_info)
         return image_info_list
@@ -158,12 +169,7 @@ class PixivCrawler(BaseCrawler):
         return None
 
 
-    # 정보 생성 메소드들은 최소한의 탐색으로 끝나게 구조 수정. 현재 방식은 느림
     # 아티스트 탑 페이지의 썸네일로부터 image_info를 생성 할 경우 사용하는 함수
-    # 수정 사항 : css_selector의 사용 최소화
-    # basecrawler의 implicitly_wait(30)로 인한 속도 저하가 가장 큰 원인
-    # 한자리수 이내의 wait 또는 개별 명령 실행 중의 wait로 시간 간격 조절 필요
-    # css_selector의 최적화 및 간소화는 필요. requests를 사용할 경우 동적 스크립트의 파싱이 난해해지므로 현재 방식을 유지
     def make_image_info_from_image_thumbnail(self, thumbnail_source):
         print("썸네일로부터 정보 생성 중")
         i_t = thumbnail_source.find_elements_by_css_selector('a')[1].text #a:last-child에서 에러, 이 방식도 종종 에러 확실한 경로 찾아볼 것
@@ -217,9 +223,11 @@ class PixivCrawler(BaseCrawler):
         return '_'.join(img_url.split('/img/')[1].split('/')[0:6])
 
 
-    # 닉네임에 상태 표시를 위해 @을 한개만 사용한 경우
+    # 닉네임에 상태 표시를 위해 @을 한개만 사용한 경우, 상태 표시 문구를 제거 ＠,@이 혼용
     def artist_name_filter(self, artist_name_text):
         if artist_name_text.count('@',1) == 1: 
             return artist_name_text.split('@')[0]
+        elif artist_name_text.count('＠',1) == 1:
+            return artist_name_text.split('＠')[0]
         else:
             return artist_name_text
