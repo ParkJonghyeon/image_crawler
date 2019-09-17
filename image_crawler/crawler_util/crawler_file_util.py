@@ -56,22 +56,27 @@ class CrawlerFileUtil():
     # file download 함수
     # Doing resp.release_conn() with preload_content=False is required so that the connection can be reused by the pool manager. 
     def image_download_from_image_info(self, image_info):
-        print(image_info)
-        print(image_info.image_url)
-        # pixiv의 경우 orig 이미지에 접근하기 위해서 헤더에 referer가 필요
-        if image_info.image_src is TargetSite.PIXIV:
-            referer_headers={'Referer':image_info.other_data['referer']}
-            resp = self.pool_manager.request('GET', image_info.image_url, headers=referer_headers, preload_content=False)
-            # pixiv의 경우 jpg인지 png인지 확실하지 않아 png로 시도 후 실패하면 jpg로 재시도 -> 썸네일 크롤러에서 urllib과 bs4를 이용한 수집 방식으로 수정하면 제거
-            if resp.status == 404:
-                resp = self.pool_manager.request('GET', image_info.image_url[:-4]+'.jpg', headers=referer_headers, preload_content=False)
-        else:
-            resp = self.pool_manager.request('GET', image_info.image_url, preload_content=False)
         save_file_name = self.file_name_filter(image_info.image_date + '_' + image_info.image_title + '.png')
-        out_file = open(self.join_file_path(image_info.image_save_path, save_file_name), 'wb')
-        out_file.write(resp.data)
-        out_file.close()
-        resp.release_conn()
+        save_file_root = self.join_file_path(image_info.image_save_path, save_file_name)
+        
+        if save_file_root is not None:
+            print(image_info)
+            print(image_info.image_url)
+            # pixiv의 경우 orig 이미지에 접근하기 위해서 헤더에 referer가 필요
+            if image_info.image_src is TargetSite.PIXIV:
+                referer_headers={'Referer':image_info.other_data['referer']}
+                resp = self.pool_manager.request('GET', image_info.image_url, headers=referer_headers, preload_content=False)
+                # pixiv의 경우 jpg인지 png인지 확실하지 않아 png로 시도 후 실패하면 jpg로 재시도 -> 썸네일 크롤러에서 urllib과 bs4를 이용한 수집 방식으로 수정하면 제거
+                if resp.status == 404:
+                    resp = self.pool_manager.request('GET', image_info.image_url[:-4]+'.jpg', headers=referer_headers, preload_content=False)
+            else:
+                resp = self.pool_manager.request('GET', image_info.image_url, preload_content=False)
+            out_file = open(save_file_root, 'wb')
+            out_file.write(resp.data)
+            out_file.close()
+            resp.release_conn()
+        else:
+            print("이미 존재하는 이미지 파일!")
 
 
     # 시간 표기 함수
