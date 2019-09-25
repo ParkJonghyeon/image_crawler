@@ -17,6 +17,7 @@ class PixivCrawler(BaseCrawler):
     def __init__(self, crawler_file_util):
         self.file_util = crawler_file_util
         self.image_save_path = self.file_util.join_dir_path(self.file_util.user.get_image_save_path(), 'pixiv')
+        self.driver = None
         self.base_url = 'https://www.pixiv.net'
         
 
@@ -51,7 +52,7 @@ class PixivCrawler(BaseCrawler):
             tmp=self.crawling_single_img_page()
         elif page_case is PixivPageCase.MULTI_IMG_PAGE:
             print("멀티 페이지")
-            tmp=self.crawling_multi_img_page(self.driver.current_url)
+            tmp=self.crawling_multi_img_page()
         elif page_case is PixivPageCase.ANIMATED_IMG_PAGE:
             print("애니메이션 페이지")
             tmp=self.crawling_animated_img_page()
@@ -105,6 +106,9 @@ class PixivCrawler(BaseCrawler):
         while True:
             # JavaScript가 실행 되어 썸네일 이미지를 모두 로드 시키도록 브라우저를 스크롤 다운 후 find
             self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            # 썸네일 소스로 이미지 리스트 위의 태그 목록을 가져오는 문제 -> 태그 목록을 회피하는 css 셀렉터 찾을 것
+            # 에러에도 나머지 이미지들은 정상적으로 다운로드 받도록 이미지 정보 생성 부 부터 스레드로 돌릴 것
+            # exception으로 에러난 이미지의 정보 로그로 출력
             img_thumb_list = WebDriverWait(self.driver, 5).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'div>ul>li>div')))
             print("썸네일 정보 입수 시작")
             for img_thumb in img_thumb_list:
@@ -172,6 +176,7 @@ class PixivCrawler(BaseCrawler):
     # 아티스트 탑 페이지의 썸네일로부터 image_info를 생성 할 경우 사용하는 함수
     def make_image_info_from_image_thumbnail(self, thumbnail_source):
         print("썸네일로부터 정보 생성 중")
+        print(thumbnail_source.text)
         i_t = thumbnail_source.find_elements_by_css_selector('a')[1].text #a:last-child에서 에러, 이 방식도 종종 에러 확실한 경로 찾아볼 것
         thumbnail_url_split = thumbnail_source.find_element_by_css_selector('img').get_attribute('src').split('/img/')[1].split('_')
         if len(thumbnail_url_split) == 3:
@@ -180,7 +185,10 @@ class PixivCrawler(BaseCrawler):
             i_u = "https://i.pximg.net/img-original/img/" + thumbnail_url_split[0] + '.gif' # 현재로서는 gif 그림 받을 방법이 없음
         i_d = self.img_url_to_date_and_id(i_u)
         referer_url = thumbnail_source.find_elements_by_css_selector('a')[1].get_attribute('href') #a:last-child에서 에러, 이 방식도 종종 에러 확실한 경로 찾아볼 것
-        o_d = {'referer':referer_url, 'img_id':referer_url.split('illust_id=')[1]}
+        if 'artworks' in referer_url:
+            o_d = {'referer':referer_url, 'img_id':referer_url.split('/')[-1]}
+        else:
+            o_d = {'referer':referer_url, 'img_id':referer_url.split('illust_id=')[1]}
         # multi image
         if len(thumbnail_source.find_elements_by_css_selector('span')) > 0:
             o_d['img_total_num'] = int(thumbnail_source.find_element_by_css_selector('span').text)
@@ -209,7 +217,11 @@ class PixivCrawler(BaseCrawler):
         i_d = self.img_url_to_date_and_id(i_u)
         i_p = self.file_util.join_dir_path(self.image_save_path, i_a)
         referer_url = self.driver.current_url
-        o_d = {'referer':referer_url, 'img_id':referer_url.split('illust_id=')[1]}
+        # url의 형태가 2종류 (/artworks/00000000, illust_id=00000000)
+        if 'artworks' in referer_url:
+            o_d = {'referer':referer_url, 'img_id':referer_url.split('/')[-1]}
+        else:
+            o_d = {'referer':referer_url, 'img_id':referer_url.split('illust_id=')[1]}
         return ImageInfo(image_title = i_t,
                          image_artist = i_a,
                          image_date = i_d,

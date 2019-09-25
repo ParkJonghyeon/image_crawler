@@ -72,6 +72,8 @@ class CrawlerFileUtil():
             else:
                 resp = self.pool_manager.request('GET', image_info.image_url, preload_content=False)
             out_file = open(save_file_root, 'wb')
+            # 메시지=('Connection broken: IncompleteRead(130712 bytes read, 788791 more expected)', IncompleteRead(130712 bytes read, 788791 more expected)) 발생
+            # 이미지가 사이즈로 인한 로딩 시간 에러로 추정. 로드 대기 처리 구현
             out_file.write(resp.data)
             out_file.close()
             resp.release_conn()
