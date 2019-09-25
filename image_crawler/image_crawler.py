@@ -1,6 +1,5 @@
 from urllib3 import util, poolmanager
-import os
-import time
+import os, time
 
 from crawler_info.info import UserInfo
 from crawler_util.system_messages import ProcessingMessage, ErrorMessage
@@ -21,31 +20,34 @@ def url_scheme_check(target_url):
         if open_test.status == 200:
             return valid_check_url.url, ProcessingMessage.get_web_type(valid_check_url.netloc)
         else:
-            print_log(ErrorMessage.UNVALID_URL)
+            logger.print_log(ErrorMessage.UNVALID_URL)
             return valid_check_url.url, None
     except Exception as e_log:
-        print_log(ErrorMessage.URL_TIMEOUT)
-        print_log(e_log)
+        logger.print_log(ErrorMessage.URL_TIMEOUT)
+        logger.print_log(e_log)
         return valid_check_url.url, None
 
 
 # main 실행 부
 def main():
-    input_url, web_type = url_scheme_check(input())
+    while True:
+        user_input = input()
+        if user_input == 'quit':
+            break
+        input_url, web_type = url_scheme_check(user_input)
     
-    if web_type is TargetSite.TWITTER:
-        input_url = input_url+'/media'
-        img_crawler = twitter_crawler.TwitterCrawler(file_util)
-    elif web_type is TargetSite.PIXIV:
-        img_crawler = pixiv_crawler.PixivCrawler(file_util)
-    elif web_type is TargetSite.RULIWEB:
-        img_crawler = ruliweb_crawler.RuliwebCrawler(file_util)
-    elif web_type is TargetSite.DCINSIDE:
-        img_crawler = dc_crawler.DCCrawler(file_util)
-    else:
-        img_crawler = base_crawler.BaseCrawler(file_util)
-
-    img_crawler.run(input_url)
+        if web_type is TargetSite.TWITTER:
+            input_url = input_url+'/media'
+            img_crawler = twitter_crawler.TwitterCrawler(file_util)
+        elif web_type is TargetSite.PIXIV:
+            img_crawler = pixiv_crawler.PixivCrawler(file_util)
+        elif web_type is TargetSite.RULIWEB:
+            img_crawler = ruliweb_crawler.RuliwebCrawler(file_util)
+        elif web_type is TargetSite.DCINSIDE:
+            img_crawler = dc_crawler.DCCrawler(file_util)
+        else:
+            img_crawler = base_crawler.BaseCrawler(file_util)
+        img_crawler.run(input_url)
 
     
 if __name__ == '__main__':
