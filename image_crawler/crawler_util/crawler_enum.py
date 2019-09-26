@@ -19,4 +19,5 @@ class PixivPageCase(Enum):
 class RuliwebPageCase(Enum):
     BOARD_PAGE = 9100
     POST_PAGE = 9101
+    SEARCH_RESULT_PAGE = 9102
 

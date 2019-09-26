@@ -26,6 +26,8 @@ class RuliwebCrawler(BaseCrawler):
             self.crawling_board(input_url)
         elif page_case is RuliwebPageCase.POST_PAGE:
             self.crawling_post(input_url)
+        elif page_case is RuliwebPageCase.SEARCH_RESULT_PAGE:
+            self.crawling_search_result(input_url)
         return None
 
 
@@ -39,11 +41,13 @@ class RuliwebCrawler(BaseCrawler):
 
     def detect_page_pattern(self, input_url):
         split_url = input_url.split('board/')[1].split('/')
-        if split_url in self.login_req_board_num:
+        if split_url[0].split('?')[0] in self.login_req_board_num:
                 self.user_login()
 
         if 'read' in split_url:
             return RuliwebPageCase.POST_PAGE
+        elif 'search_key' in split_url[0]:
+            return RuliwebPageCase.SEARCH_RESULT_PAGE
         else:
             return RuliwebPageCase.BOARD_PAGE
 
@@ -51,26 +55,34 @@ class RuliwebCrawler(BaseCrawler):
     def crawling_post(self, input_url):
         # request 모듈로 페이지와 댓글 모두 가져와진다면 request로 수행
         # 단일 게시물의 이미지를 모두 다운로드, 설정 여부에 따라 image_reply를 추가 실행
+        # board_main board_main_view view_content img
         return None
 
 
     def crawling_image_reply(self):
         # 이미지 덧글의 모든 이미지 수집
+        # board_bottom comment_container comment_table img
+        # 댓글 2페이지 부터 수집할 방법 필요
         return None
 
 
     def crawling_board(self, input_url):
         # 보드에서 주소를 확보해 post를 반복 실행
-        return None
+        # 단순한 보드는 페이지가 무한정 존재하므로 해당 한 페이지만을 수집
+        # 기능 추가에 따라 지정 페이지, 지정 날짜만큼 반복 수집 구현을 고려
+        post_url_list = []
+
+        for post_url in post_url_list:
+            self.crawling_post(post_url)
+        return len(post_url_list)
 
 
-    def crawling_post_on_selenium(self):
-        return None
-
-
-    def crawling_image_reply_on_selenium(self):
-        return None
-
-
-    def crawling_board_on_selenium(self):
+    def crawling_search_result(self, input_url):
+        # 보드에 게시물이 없을 때까지 주소 값을 변경하면서 crawling_board를 실행
+        page_num = 0
+        while (True):
+            page_num += 1
+            crawling_result = self.crawling_board(input_url+'&page='+str(page_num))
+            if crawling_result == 0:
+                break
         return None
