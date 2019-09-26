@@ -14,3 +14,9 @@ class PixivPageCase(Enum):
     SINGLE_IMG_PAGE = 9002
     MULTI_IMG_PAGE = 9003
     ANIMATED_IMG_PAGE = 9004
+
+
+class RuliwebPageCase(Enum):
+    BOARD_PAGE = 9100
+    POST_PAGE = 9101
+

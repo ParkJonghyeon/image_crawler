@@ -12,8 +12,11 @@ class UserInfo():
         self.__chrome_port = config_parser['SYSTEM']['CHROME_PORT']
         self.__default_timeout = float(config_parser['SYSTEM']['DEFAULT_TIMEOUT'])
         self.__image_save_path = config_parser['SYSTEM']['IMAGE_SAVE_PATH']
+        self.__user_agent = config_parser['SYSTEM']['USER_AGENT']
         self.__pixiv_id = config_parser['ACCOUNT']['PIXIV_ID']
         self.__pixiv_pw = config_parser['ACCOUNT']['PIXIV_PW']
+        self.__ruliweb_id = config_parser['ACCOUNT']['RULIWEB_ID']
+        self.__ruliweb_pw = config_parser['ACCOUNT']['RULIWEB_PW']
 
     
     def get_chrome_ver(self):
@@ -40,12 +43,24 @@ class UserInfo():
         return self.__image_save_path
 
 
+    def get_user_agent(self):
+        return self.__user_agent
+
+
     def get_pixiv_id(self):
         return self.__pixiv_id
 
 
     def get_pixiv_pw(self):
         return self.__pixiv_pw
+
+
+    def get_ruliweb_id(self):
+        return self.__ruliweb_id
+
+
+    def get_ruliweb_pw(self):
+        return self.__ruliweb_pw
 
 
 class ImageInfo():
