@@ -42,6 +42,11 @@ class BaseCrawler():
             # self.file_util.image_download_from_image_info(img)
 
 
+    def driver_close(self):
+        if self.driver is not None:
+            self.driver.close()
+
+
     # Override this method
     def crawler_rule(self, input_url):
         self.driver.get(input_url)

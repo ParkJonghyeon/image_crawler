@@ -217,7 +217,7 @@ class PixivCrawler(BaseCrawler):
         i_d = self.img_url_to_date_and_id(i_u)
         i_p = self.file_util.join_dir_path(self.image_save_path, i_a)
         referer_url = self.driver.current_url
-        # url의 형태가 2종류 (/artworks/00000000, illust_id=00000000)
+        # 새로운 주소 양식 = /artworks/00000000, 이전 주소 양식 = illust_id=00000000
         if 'artworks' in referer_url:
             o_d = {'referer':referer_url, 'img_id':referer_url.split('/')[-1]}
         else:
