@@ -6,7 +6,7 @@ from crawler_util.system_messages import ProcessingMessage, ErrorMessage
 from crawler_util.system_logger import SystemLogger
 from crawler_util.crawler_enum import TargetSite
 from crawler_util.crawler_file_util import CrawlerFileUtil
-from crawler import *
+import crawler
 
 
 # 입력 받은 url의 https 포함 여부 체크
@@ -30,24 +30,34 @@ def url_scheme_check(target_url):
 
 # main 실행 부
 def main():
+    prev_web_type = None
+    img_crawler = None
     while True:
         user_input = input()
         if user_input == 'quit':
             break
         input_url, web_type = url_scheme_check(user_input)
     
-        if web_type is TargetSite.TWITTER:
-            input_url = input_url+'/media'
-            img_crawler = twitter_crawler.TwitterCrawler(file_util)
-        elif web_type is TargetSite.PIXIV:
-            img_crawler = pixiv_crawler.PixivCrawler(file_util)
-        elif web_type is TargetSite.RULIWEB:
-            img_crawler = ruliweb_crawler.RuliwebCrawler(file_util)
-        elif web_type is TargetSite.DCINSIDE:
-            img_crawler = dc_crawler.DCCrawler(file_util)
-        else:
-            img_crawler = base_crawler.BaseCrawler(file_util)
+        # 최초/이전 작업과 다른 사이트를 크롤링 할 경우 크롤러 객체를 재생성
+        # 동일한 사이트에서 반복 작업이라면 생성 된 객체를 재사용
+        if prev_web_type != web_type:
+            # 기존에 생성 된 크롤러 객체가 있다면 열려있는 웹 드라이버를 종료
+            if img_crawler is not None:
+                img_crawler.driver_close()
+            # 목적 사이트에 맞는 크롤러 객체 생성
+            if web_type is TargetSite.TWITTER:
+                input_url = input_url+'/media'
+                img_crawler = crawler.twitter_crawler.TwitterCrawler(file_util)
+            elif web_type is TargetSite.PIXIV:
+                img_crawler = crawler.pixiv_crawler.PixivCrawler(file_util)
+            elif web_type is TargetSite.RULIWEB:
+                img_crawler = crawler.ruliweb_crawler.RuliwebCrawler(file_util)
+            elif web_type is TargetSite.DCINSIDE:
+                img_crawler = crawler.dc_crawler.DCCrawler(file_util)
+            else:
+                img_crawler = base_crawler.BaseCrawler(file_util)
         img_crawler.run(input_url)
+        prev_web_type = web_type
 
     
 if __name__ == '__main__':
