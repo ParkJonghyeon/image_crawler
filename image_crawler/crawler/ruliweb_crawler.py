@@ -1,13 +1,16 @@
 import requests, time, random
+from lxml.html import fromstring
+
 from crawler.base_crawler import BaseCrawler
 from crawler_info.info import ImageInfo
 from crawler_util.crawler_enum import TargetSite, RuliwebPageCase
 
 
 class RuliwebCrawler(BaseCrawler):
-    def __init__(self, crawler_file_util):
+    def __init__(self, crawler_file_util, crawling_type):
         self.file_util = crawler_file_util
         self.image_save_path = self.file_util.join_dir_path(self.file_util.user.get_image_save_path(), 'ruliweb')
+        self.crawling_type = crawling_type
         self.session = None
         self.login_req_board_num = ['310001', '310002', '310003', '310004', '310005', '310006', '310007']
         
@@ -16,7 +19,6 @@ class RuliwebCrawler(BaseCrawler):
     def crawler_rule(self, input_url):
         # url형식 또는 html 형식을 파악해 post 또는 board를 실행
         # 필요에 따라 유저 로그인 수행(루리웹은 로그인 필요한 게시판이 한정되어있으므로 로그인 필요한 예외 주소로 구분)
-        self.session = requests.Session()
         self.session.headers.update({
             'User-Agent': self.file_util.user.get_user_agent(),
         })
@@ -56,6 +58,18 @@ class RuliwebCrawler(BaseCrawler):
         # request 모듈로 페이지와 댓글 모두 가져와진다면 request로 수행
         # 단일 게시물의 이미지를 모두 다운로드, 설정 여부에 따라 image_reply를 추가 실행
         # board_main board_main_view view_content img
+        page_html = fromstring(self.session.get(input_url).text)
+        img_list = page_html.cssselect('.board_main_view .img_load img')
+        for idx, img in enumerate(img_list):
+            img_src = 'http:' + img.get('src')
+            image_info = ImageInfo(image_title = page_html.cssselect('.subject_text')[0].text + '_' + str(idx),
+                                 image_artist = None,
+                                 image_date = self.date_formatting(page_html.cssselect('.regdate')[0].text),
+                                 image_url = img_src,
+                                 image_save_path = self.file_util.join_dir_path(self.image_save_path),
+                                 image_src = TargetSite.RULIWEB,
+                                 other_data = None)
+            self.file_util.image_download_from_image_info(image_info)
         return None
 
 
@@ -86,3 +100,7 @@ class RuliwebCrawler(BaseCrawler):
             if crawling_result == 0:
                 break
         return None
+
+
+    def date_formatting(self, regdate):
+        return regdate.replace('.','_').replace(':','_').replace(' ','_').replace('(','').replace(')','')
