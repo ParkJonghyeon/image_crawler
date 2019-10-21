@@ -4,9 +4,12 @@ import os, time
 from crawler_info.info import UserInfo
 from crawler_util.system_messages import ProcessingMessage, ErrorMessage
 from crawler_util.system_logger import SystemLogger
-from crawler_util.crawler_enum import TargetSite
+from crawler_util.crawler_enum import TargetSite, CrawlingType
 from crawler_util.crawler_file_util import CrawlerFileUtil
-import crawler
+from crawler.twitter_crawler import TwitterCrawler
+from crawler.pixiv_crawler import PixivCrawler
+from crawler.ruliweb_crawler import RuliwebCrawler
+from crawler.dc_crawler import DCCrawler
 
 
 # 입력 받은 url의 https 포함 여부 체크
@@ -47,15 +50,15 @@ def main():
             # 목적 사이트에 맞는 크롤러 객체 생성
             if web_type is TargetSite.TWITTER:
                 input_url = input_url+'/media'
-                img_crawler = crawler.twitter_crawler.TwitterCrawler(file_util)
+                img_crawler = TwitterCrawler(file_util, CrawlingType.DRIVER)
             elif web_type is TargetSite.PIXIV:
-                img_crawler = crawler.pixiv_crawler.PixivCrawler(file_util)
+                img_crawler = PixivCrawler(file_util, CrawlingType.DRIVER)
             elif web_type is TargetSite.RULIWEB:
-                img_crawler = crawler.ruliweb_crawler.RuliwebCrawler(file_util)
+                img_crawler = RuliwebCrawler(file_util, CrawlingType.SESSION)
             elif web_type is TargetSite.DCINSIDE:
-                img_crawler = crawler.dc_crawler.DCCrawler(file_util)
+                img_crawler = DCCrawler(file_util, CrawlingType.SESSION)
             else:
-                img_crawler = base_crawler.BaseCrawler(file_util)
+                img_crawler = base_crawler.BaseCrawler(file_util, CrawlingType.DRIVER)
         img_crawler.run(input_url)
         prev_web_type = web_type
 

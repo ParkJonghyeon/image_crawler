@@ -1,7 +1,8 @@
 from selenium import webdriver
-import subprocess
+import subprocess, requests
 
 from crawler_info.info import ImageInfo
+from crawler_util.crawler_enum import CrawlingType
 from crawler_util.system_messages import ProcessingMessage, ErrorMessage
 
 
@@ -12,7 +13,9 @@ class BaseCrawler():
     def __init__(self, crawler_file_util):
         self.file_util = crawler_file_util
         self.image_save_path = self.file_util.join_dir_path(self.file_util.user.get_image_save_path(), 'base')
+        self.crawling_type = crawling_type
         self.driver = None
+        self.session = None
                 
     
     # 웹 드라이버 정상 실행 체크
@@ -34,8 +37,12 @@ class BaseCrawler():
 
 
     def run(self, input_url):
-        if self.driver is None:
-            self.driver = self.driver_open(self.file_util.user.get_chrome_root())
+        if self.crawling_type is CrawlingType.DRIVER:
+            if self.driver is None:
+                self.driver = self.driver_open(self.file_util.user.get_chrome_root())
+        else:
+            if self.session is None:
+                self.session = requests.Session()
         if self.image_save_path is not None:
             self.crawler_rule(input_url)
             # img = ImageInfo(image_save_path=self.image_save_path, image_url='example.img_url')

@@ -1,6 +1,11 @@
 from enum import Enum
 
 
+class CrawlingType(Enum):
+    DRIVER = 0
+    SESSION = 1
+
+
 class TargetSite(Enum):
     TWITTER = 1000
     PIXIV = 1001

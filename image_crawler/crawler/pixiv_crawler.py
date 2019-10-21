@@ -14,9 +14,10 @@ from crawler_util.crawler_enum import TargetSite, PixivPageCase
 #여러장의 이미지는 span 등의 값으로 개수를 알아올수 있음
 #셀레니움은 느리므로 해당 이미지의 썸네일 정도만 긁게 하고 세부적인 파싱은 urllib으로
 class PixivCrawler(BaseCrawler):
-    def __init__(self, crawler_file_util):
+    def __init__(self, crawler_file_util, crawling_type):
         self.file_util = crawler_file_util
         self.image_save_path = self.file_util.join_dir_path(self.file_util.user.get_image_save_path(), 'pixiv')
+        self.crawling_type = crawling_type
         self.driver = None
         self.base_url = 'https://www.pixiv.net'
         
