@@ -107,10 +107,9 @@ class PixivCrawler(BaseCrawler):
         while True:
             # JavaScript가 실행 되어 썸네일 이미지를 모두 로드 시키도록 브라우저를 스크롤 다운 후 find
             self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            # 썸네일 소스로 이미지 리스트 위의 태그 목록을 가져오는 문제 -> 태그 목록을 회피하는 css 셀렉터 찾을 것
             # 에러에도 나머지 이미지들은 정상적으로 다운로드 받도록 이미지 정보 생성 부 부터 스레드로 돌릴 것
             # exception으로 에러난 이미지의 정보 로그로 출력
-            img_thumb_list = WebDriverWait(self.driver, 5).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'div>ul>li>div')))
+            img_thumb_list = WebDriverWait(self.driver, 5).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'div>section>ul>li>div')))
             print("썸네일 정보 입수 시작")
             for img_thumb in img_thumb_list:
                 image_info = self.make_image_info_from_image_thumbnail(img_thumb)
