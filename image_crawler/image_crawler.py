@@ -35,6 +35,7 @@ def url_scheme_check(target_url):
 def main():
     prev_web_type = None
     img_crawler = None
+    print("크롤링할 사이트의 주소를 입력해주세요. 현재 트위터, 픽시브, 루리웹 단일 게시물을 지원합니다.(quit을 입력하여 종료):")
     while True:
         user_input = input()
         if user_input == 'quit':
@@ -60,6 +61,7 @@ def main():
             else:
                 img_crawler = base_crawler.BaseCrawler(file_util, CrawlingType.DRIVER)
         img_crawler.run(input_url)
+        print("타겟 주소의 모든 이미지 수집 완료. 계속 하시려면 다음 주소를 입력해주세요.(quit을 입력하여 종료):")
         prev_web_type = web_type
 
     
