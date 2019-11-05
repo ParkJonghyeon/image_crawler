@@ -262,3 +262,4 @@ __pycache__/
 /image_crawler/crawler_info/userinfo.ini
 /image_crawler/webdriver/crawler_user_data/
 /image_crawler/save_img/
+/image_crawler/pyinstaller_spec.spec
