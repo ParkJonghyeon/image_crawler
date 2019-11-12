@@ -35,34 +35,49 @@ def url_scheme_check(target_url):
 def main():
     prev_web_type = None
     img_crawler = None
-    print("크롤링할 사이트의 주소를 입력해주세요. 현재 트위터, 픽시브, 루리웹 단일 게시물을 지원합니다.(quit을 입력하여 종료):")
+    user_input_lines = []
+    print("크롤링할 사이트의 주소를 입력해주세요. 현재 트위터, 픽시브, 루리웹 단일 게시물을 지원합니다.\n(크롤링할 주소 or 종료 명령어 입력 후 Enter를 한번 더 입력해 명령 수행. quit을 입력하면 종료):")
     while True:
+        user_input_lines = []
         user_input = input()
-        if user_input == 'quit':
-            break
-        input_url, web_type = url_scheme_check(user_input)
+        while user_input != '':
+            user_input_lines.append(user_input)
+            user_input = input()
+        for target_input in user_input_lines:
+            if target_input == 'quit':
+                # 이중 반복문 탈출을 위한 변수 조작
+                # target_input의 값이 quit이면 이후에는 주소가 없으므로 전역 변수인 user_input_lines를 quit만 남기고 모두 삭제
+                user_input_lines = ['quit']
+                break
+            input_url, web_type = url_scheme_check(target_input)
     
-        # 최초/이전 작업과 다른 사이트를 크롤링 할 경우 크롤러 객체를 재생성
-        # 동일한 사이트에서 반복 작업이라면 생성 된 객체를 재사용
-        if prev_web_type != web_type:
-            # 기존에 생성 된 크롤러 객체가 있다면 열려있는 웹 드라이버를 종료
-            if img_crawler is not None:
-                img_crawler.driver_close()
-            # 목적 사이트에 맞는 크롤러 객체 생성
-            if web_type is TargetSite.TWITTER:
-                input_url = input_url+'/media'
-                img_crawler = TwitterCrawler(file_util, CrawlingType.DRIVER)
-            elif web_type is TargetSite.PIXIV:
-                img_crawler = PixivCrawler(file_util, CrawlingType.DRIVER)
-            elif web_type is TargetSite.RULIWEB:
-                img_crawler = RuliwebCrawler(file_util, CrawlingType.SESSION)
-            elif web_type is TargetSite.DCINSIDE:
-                img_crawler = DCCrawler(file_util, CrawlingType.SESSION)
-            else:
-                img_crawler = base_crawler.BaseCrawler(file_util, CrawlingType.DRIVER)
-        img_crawler.run(input_url)
-        print("타겟 주소의 모든 이미지 수집 완료. 계속 하시려면 다음 주소를 입력해주세요.(quit을 입력하여 종료):")
-        prev_web_type = web_type
+            # 최초/이전 작업과 다른 사이트를 크롤링 할 경우 크롤러 객체를 재생성
+            # 동일한 사이트에서 반복 작업이라면 생성 된 객체를 재사용
+            if prev_web_type != web_type:
+                # 기존에 생성 된 크롤러 객체가 있다면 열려있는 웹 드라이버를 종료
+                if img_crawler is not None:
+                    img_crawler.driver_close()
+                # 목적 사이트에 맞는 크롤러 객체 생성
+                if web_type is TargetSite.TWITTER:
+                    input_url = input_url+'/media'
+                    img_crawler = TwitterCrawler(file_util, CrawlingType.DRIVER)
+                elif web_type is TargetSite.PIXIV:
+                    img_crawler = PixivCrawler(file_util, CrawlingType.DRIVER)
+                elif web_type is TargetSite.RULIWEB:
+                    img_crawler = RuliwebCrawler(file_util, CrawlingType.SESSION)
+                elif web_type is TargetSite.DCINSIDE:
+                    img_crawler = DCCrawler(file_util, CrawlingType.SESSION)
+                else:
+                    img_crawler = base_crawler.BaseCrawler(file_util, CrawlingType.DRIVER)
+            img_crawler.run(input_url)
+            print("타겟 주소의 모든 이미지 수집 완료. 계속 하시려면 다음 주소를 입력해주세요.(quit을 입력하여 종료):")
+            prev_web_type = web_type
+        # user_input_lines의 값이 모두 삭제 되고 0번째에 quit만 남아 조건문 활성화
+        if user_input_lines[0] == 'quit':
+            break
+    if img_crawler is not None:
+        img_crawler.driver_close()
+    print("프로그램을 종료합니다.")
 
     
 if __name__ == '__main__':
