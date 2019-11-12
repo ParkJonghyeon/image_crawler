@@ -20,6 +20,7 @@ class PixivCrawler(BaseCrawler):
         self.crawling_type = crawling_type
         self.driver = None
         self.base_url = 'https://www.pixiv.net'
+        self.login_cheack = False
         
 
     # Override this method
@@ -27,14 +28,19 @@ class PixivCrawler(BaseCrawler):
         # crawler_user_data에서 브라우저의 프로필을 관리
         # 한번 로그인해두면 재실행시에도 로그인 되어있을 수 있음
         # 실행마다 로그인 상태를 체크하여 유저정보 ini에 픽시브 계정 데이터가 있는 경우만 로그인 시도
-        print("베이스 이동")
-        self.driver.get(self.base_url)
-        try:
-            WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, '#page-mypage')))
-            print("로그인 확인")
-        except:
-            print("로그인 시도")
-            self.user_login()
+        if self.login_cheack is False:
+            print("베이스 이동")
+            self.driver.get(self.base_url)
+            try:
+                WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, '#page-mypage')))
+                print("로그인 확인")
+            except:
+                print("로그인 시도")
+                if self.user_login():
+                    print("계정 데이터 확인. 로그인 성공")
+                else:
+                    print("계정 데이터 오류. 로그인 실패")
+            self.login_cheack = True
         print("입력 url 이동")
         self.driver.get(input_url)
         time.sleep(3)
