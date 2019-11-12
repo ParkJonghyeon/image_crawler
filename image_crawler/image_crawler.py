@@ -43,13 +43,16 @@ def main():
         while user_input != '':
             user_input_lines.append(user_input)
             user_input = input()
-        for target_input in user_input_lines:
+        target_input_num = len(user_input_lines) - 1
+        for input_idx, target_input in enumerate(user_input_lines):
             if target_input == 'quit':
                 # 이중 반복문 탈출을 위한 변수 조작
                 # target_input의 값이 quit이면 이후에는 주소가 없으므로 전역 변수인 user_input_lines를 quit만 남기고 모두 삭제
+                print("quit 명령어 입력 확인")
                 user_input_lines = ['quit']
                 break
             input_url, web_type = url_scheme_check(target_input)
+            print("다음 주소에 대한 크롤링 실행 : "+target_input)
     
             # 최초/이전 작업과 다른 사이트를 크롤링 할 경우 크롤러 객체를 재생성
             # 동일한 사이트에서 반복 작업이라면 생성 된 객체를 재사용
@@ -70,7 +73,8 @@ def main():
                 else:
                     img_crawler = base_crawler.BaseCrawler(file_util, CrawlingType.DRIVER)
             img_crawler.run(input_url)
-            print("타겟 주소의 모든 이미지 수집 완료. 계속 하시려면 다음 주소를 입력해주세요.(quit을 입력하여 종료):")
+            if input_idx == target_input_num:
+                print("타겟 주소의 모든 이미지 수집 완료. 계속 하시려면 다음 주소를 입력해주세요.(quit을 입력하여 종료):")
             prev_web_type = web_type
         # user_input_lines의 값이 모두 삭제 되고 0번째에 quit만 남아 조건문 활성화
         if user_input_lines[0] == 'quit':
