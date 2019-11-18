@@ -62,8 +62,19 @@ def main():
                     img_crawler.driver_close()
                 # 목적 사이트에 맞는 크롤러 객체 생성
                 if web_type is TargetSite.TWITTER:
+                    print("수집 기간을 지정해주세요. 입력 값이 없으면 모든 기간을 수집합니다.(YYYYMMDD-YYYYMMDD)")
+                    valid, start_seconds, end_seconds = False, 0, 0
+                    while valid is False:
+                        input_period = input()
+                        if input_period == '':
+                            break;
+                        else:
+                            valid, start_seconds, end_seconds = file_util.period_to_seconds(input_period)
+                            if valid is False:
+                                print("입력한 기간이 유효하지 않습니다. 다시 입력해주세요.(YYYYMMDD-YYYYMMDD)")
                     input_url = input_url+'/media'
                     img_crawler = TwitterCrawler(file_util, CrawlingType.DRIVER)
+                    img_crawler.set_crawling_period(start_seconds, end_seconds)
                 elif web_type is TargetSite.PIXIV:
                     img_crawler = PixivCrawler(file_util, CrawlingType.DRIVER)
                 elif web_type is TargetSite.RULIWEB:

@@ -87,6 +87,21 @@ class CrawlerFileUtil():
         return time.strftime(time_format, time.localtime(seconds_val))
 
 
+    # 입력 기간을 누적 초로 변환하는 함수
+    # 현재 트위터 수집 기간 결정을 위해서만 사용
+    def period_to_seconds(self, input_period):
+        try:
+            st, et = input_period.split('-')
+            start_seconds = int(time.mktime(time.strptime(st,'%Y%m%d')))
+            end_seconds = int(time.mktime(time.strptime(et,'%Y%m%d')))
+            if end_seconds > start_seconds:
+                return True, start_seconds, end_seconds
+            else:
+                return False, start_seconds, end_seconds
+        except:
+            return False, 0, 0
+
+
     # 파일 이름에 사용 금지 된 문자 필터링
     def file_name_filter(self, file_name):
         for sw in self.stop_word:
